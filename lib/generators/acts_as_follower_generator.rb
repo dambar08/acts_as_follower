@@ -12,7 +12,13 @@ class ActsAsFollowerGenerator < Rails::Generators::Base
   # Implement the required interface for Rails::Generators::Migration.
   # taken from https://github.com/rails/rails/blob/master/activerecord/lib/rails/generators/active_record.rb
   def self.next_migration_number(dirname)
-    if ActiveRecord::Base.timestamped_migrations
+    if Rails::VERSION::STRING >= "7.1.0"
+      if ActiveRecord.timestamped_migrations
+        [Time.now.utc.strftime("%Y%m%d%H%M%S"), "%.14d" % number].max
+      else
+        "%.3d" % dirname.to_i
+      end
+    elsif ActiveRecord::Base.timestamped_migrations
       Time.now.utc.strftime("%Y%m%d%H%M%S")
     else
      "%.3d" % (current_migration_number(dirname) + 1)
